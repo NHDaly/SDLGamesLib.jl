@@ -34,7 +34,8 @@ ScreenPixelPos(x::Number, y::Number) = ScreenPixelPos(convert.(Int, floor.((x,y)
 struct UIPixelCoords <: ScreenCoords end
 
 """
-    UIPixelPos(400, 450)
+    struct UIPixelPos <: AbstractPos{UIPixelCoords}
+
 Position on screen, in un-dpi-scaled "pixels". (0,0) is top-left of screen.
 
 These should be used whenever placing anything on the screen, since they are
@@ -52,12 +53,20 @@ UIPixelPos(x::Number, y::Number) = UIPixelPos(convert.(Int, floor.((x,y)))...)
 +(a::UIPixelPos, x::Number) = UIPixelPos(a.x+x, a.y+x)
 
 
-""" Absolute size on screen, in pixels. Use with ScreenPixelPos. """
+"""
+    struct ScreenPixelDims <: AbstractDims{ScreenPixelCoords}
+
+Absolute size on screen, in pixels. Use with ScreenPixelPos.
+"""
 struct ScreenPixelDims <: AbstractDims{ScreenPixelCoords}
     w::Int32  # Int32 to match SDL
     h::Int32
 end
-""" Size on screen, in un-dpi-scaled "pixels". Use with UIPixelPos. """
+"""
+    struct UIPixelDims <: AbstractDims{UIPixelCoords}
+
+Size on screen, in un-dpi-scaled "pixels". Use with UIPixelPos.
+"""
 struct UIPixelDims <: AbstractDims{UIPixelCoords}
     w::Int
     h::Int
@@ -73,8 +82,8 @@ Camera() = Camera(WorldPos(0,0),100,100)
 
 # Note: These are all Atomics, since they can be modified by the
 # windowEventWatcher callback, which can run in another thread!
-winWidth, winHeight = Threads.Atomic{Int32}(800), Threads.Atomic{Int32}(600)
-winWidth_highDPI, winHeight_highDPI = Threads.Atomic{Int32}(800), Threads.Atomic{Int32}(600)
+const winWidth, winHeight = Threads.Atomic{Int32}(800), Threads.Atomic{Int32}(600)
+const winWidth_highDPI, winHeight_highDPI = Threads.Atomic{Int32}(800), Threads.Atomic{Int32}(600)
 
 screenCenter() = UIPixelPos(winWidth[]/2, winHeight[]/2)
 screenCenterX() = winWidth[]/2
