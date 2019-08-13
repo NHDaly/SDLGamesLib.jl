@@ -42,7 +42,7 @@ struct Vector2D   # TODO: consider making this abstract and parameterized on Coo
     x::Float64
     y::Float64
 end
-import Base.*, Base./, Base.-, Base.+
+import Base.(*), Base.(/), Base.(-), Base.(+)
 +(a::Vector2D, b::Vector2D) = Vector2D(a.x+b.x, a.y+b.y)
 -(a::Vector2D, b::Vector2D) = Vector2D(a.x-b.x, a.y-b.y)
 *(a::Vector2D, x::Number) = Vector2D(a.x*x, a.y*x)

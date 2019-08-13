@@ -47,7 +47,9 @@ end
 UIPixelPos(x::Number, y::Number) = UIPixelPos(convert.(Int, floor.((x,y)))...)
 
 +(a::UIPixelPos, b::UIPixelPos) = UIPixelPos(a.x+b.x, a.y+b.y)
-.+(a::UIPixelPos, x::Number) = UIPixelPos(a.x+x, a.y+x)
+# TODO: How to define .+ like this in Julia 1.0+?
+#.+(a::UIPixelPos, x::Number) = UIPixelPos(a.x+x, a.y+x)
++(a::UIPixelPos, x::Number) = UIPixelPos(a.x+x, a.y+x)
 
 
 """ Absolute size on screen, in pixels. Use with ScreenPixelPos. """
@@ -137,11 +139,10 @@ SetRenderDrawColor(renderer::Ptr{SDL2.Renderer}, c::SDL2.Color) = SDL2.SetRender
     renderer, Int64(c.r), Int64(c.g), Int64(c.b), Int64(c.a))
 
 # Convenience functions to allow `WorldPos(x,y)...` to become `x,y`
-import Base: start, next, done
-start(a::Union{AbstractPos, AbstractDims}) = 1
-next(p::AbstractPos, i) = (if (i==1) return (p.x,2) elseif (i==2) return (p.y,3) else throw(DomainError()) end)
-next(p::AbstractDims, i) = (if (i==1) return (p.w,2) elseif (i==2) return (p.h,3) else throw(DomainError()) end)
-done(p::Union{AbstractPos, AbstractDims}, i) = (i == 3)
+Base.iterate(p::AbstractPos, i=1) = if i==1 return (p.x,2) elseif i==2 return (p.y,3) else nothing end
+Base.iterate(p::AbstractDims, i=1) = if i==1 return (p.w,2) elseif i==2 return (p.h,3) else nothing end
+# To allow .+ (but doesn't work)
+#Base.length(::Union{AbstractPos,AbstractDims}) = 2
 
 topLeftPos(center::P, dims::D) where P<:AbstractPos{Coord} where D<:AbstractDims{Coord} where Coord<:ScreenCoords = P(center.x - dims.w/2., center.y - dims.h/2.)  # positive is down
 topLeftPos(center::P, dims::D) where P<:AbstractPos{Coord} where D<:AbstractDims{Coord} where Coord = P(center.x - dims.w/2., center.y + dims.h/2.)  # positive is up
@@ -274,7 +275,7 @@ end
 
 #  ------- Image rendering ---------
 
-function render(t::Ptr{SDL2.Texture}, pos::AbstractPos{C}, cam::Camera, renderer; size::Union{Void, AbstractDims{C}} = nothing) where C
+function render(t::Ptr{SDL2.Texture}, pos::AbstractPos{C}, cam::Camera, renderer; size::Union{Cvoid, AbstractDims{C}} = nothing) where C
     if (t == C_NULL) return end
     pos = toScreenPos(pos, cam)
     if size != nothing
