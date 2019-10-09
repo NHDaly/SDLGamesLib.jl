@@ -1,6 +1,7 @@
 # -------- Opening a window ---------------
 # Forward reference for @cfunction
 function windowEventWatcher end
+const window_event_watcher_cfunc = Ref(Ptr{Nothing}(0))
 
 const window_paused = Threads.Atomic{UInt8}(0) # Whether or not the game should be running (if lost focus)
 const frame_timer = WallTimer()
@@ -16,7 +17,8 @@ function makeWinRenderer(title = "My Julia SDL Game",
     if min_win_dims !== nothing
         SDL2.SetWindowMinimumSize(win, min_win_dims.w, min_win_dims.h)
     end
-    SDL2.AddEventWatch(@cfunction(windowEventWatcher, Cint, (Ptr{Nothing}, Ptr{SDL2.Event})), win);
+    window_event_watcher_cfunc[] = @cfunction(windowEventWatcher, Cint, (Ptr{Nothing}, Ptr{SDL2.Event}))
+    SDL2.AddEventWatch(window_event_watcher_cfunc[], win);
 
     # Find out how big the created window actually was (depends on the system):
     winWidth[], winHeight[], winWidth_highDPI[], winHeight_highDPI[] = getWindowSize(win)
@@ -59,9 +61,9 @@ function windowEventWatcher(data_ptr::Ptr{Cvoid}, event_ptr::Ptr{SDL2.Event})::C
             window_paused[] = curPaused  # Allow game to resume now that resizing is done.
         elseif (winevent == SDL2.WINDOWEVENT_FOCUS_LOST || winevent == SDL2.WINDOWEVENT_HIDDEN || winevent == SDL2.WINDOWEVENT_MINIMIZED)
             # Stop game playing so resizing doesn't cause problems.
-            if !debug  # For debug builds, allow editing while playing
+            #if !debug  # For debug builds, allow editing while playing
                 window_paused[] = 1
-            end
+            #end
         elseif (winevent == SDL2.WINDOWEVENT_FOCUS_GAINED || winevent == SDL2.WINDOWEVENT_SHOWN)
             window_paused[] = 0
         end
@@ -86,7 +88,7 @@ struct QuitException <: Exception end
 function quitSDL(win)
     # Need to close the callback before quitting SDL to prevent it from hanging
     # https://github.com/n0name/2D_Engine/issues/3
-    SDL2.DelEventWatch(cfunction(windowEventWatcher, Cint, Tuple{Ptr{Cvoid}, Ptr{SDL2.Event}}), win);
+    SDL2.DelEventWatch(window_event_watcher_cfunc[], win);
     SDL2.Mix_CloseAudio()
     SDL2.TTF_Quit()
     SDL2.Quit()

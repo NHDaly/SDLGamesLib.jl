@@ -75,3 +75,6 @@ pause!(t)
 update!(t, 2.0)
 unpause!(t)
 elapsed(t)
+
+
+export start!, pause!, unpause!, elapsed, update!

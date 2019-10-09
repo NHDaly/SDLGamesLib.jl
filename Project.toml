@@ -3,6 +3,9 @@ uuid = "09e76198-bdf8-11e9-2e7a-fb315f3da3a4"
 authors = ["Nathan Daly"]
 version = "0.1.0"
 
+[deps]
+SimpleDirectMediaLayer = "98e33af6-2ee5-5afd-9e75-cbc738b767c4"
+
 [compat]
 julia = "1"
 
