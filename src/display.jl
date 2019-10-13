@@ -300,3 +300,6 @@ function render(t::Ptr{SDL2.Texture}, pos::AbstractPos{C}, cam::Camera, renderer
     rect = SDL2.Rect(pos.x - w÷2,pos.y - h÷2,w,h)
     SDL2.RenderCopy(renderer, t, C_NULL, pointer_from_objref(rect))
 end
+
+
+# --------- Display navigation ----------

@@ -7,6 +7,7 @@ include("objects.jl")
 include("display.jl")
 include("timing.jl")
 include("window.jl")
+include("events.jl")
 #include("pixel.jl")
 
 end # module
