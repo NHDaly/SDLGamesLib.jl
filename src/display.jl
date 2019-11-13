@@ -78,7 +78,7 @@ mutable struct Camera
     w::Threads.Atomic{Float32}   # Note: These are Atomics, since they can be modified by the
     h::Threads.Atomic{Float32}   # windowEventWatcher callback, which can run in another thread!
 end
-Camera() = Camera(WorldPos(0,0),100,100)
+Camera() = Camera(WorldPos(0,0),Threads.Atomic{Float32}(100),Threads.Atomic{Float32}(100))
 
 # Note: These are all Atomics, since they can be modified by the
 # windowEventWatcher callback, which can run in another thread!
@@ -194,6 +194,10 @@ SDL2.Color(1,5,1,1) - 2 == SDL2.Color(0,3,0,0)
 
 
 # ---- Text Rendering ----
+function set_default_font(fontname, fontsize)
+    global defaultFontName = fontname
+    global defaultFontSize = fontsize
+end
 
 fonts_cache = Dict()
 txt_cache = Dict()
@@ -284,10 +288,13 @@ end
 
 #  ------- Image rendering ---------
 
-function render(t::Ptr{SDL2.Texture}, pos::AbstractPos{C}, cam::Camera, renderer; size::Union{Cvoid, AbstractDims{C}} = nothing) where C
+function render(t::Ptr{SDL2.Texture}, pos::AbstractPos{C}, cam::Camera, renderer;
+                size::Union{Cvoid, AbstractDims{C}, Number} = nothing,
+                src_rect::Union{Ptr{Cvoid}, SDL2.Rect} = C_NULL,
+                ) where {C}
     if (t == C_NULL) return end
     pos = toScreenPos(pos, cam)
-    if size != nothing
+    if size isa AbstractDims
         size = toScreenPixelDims(size, cam)
         w = size.w
         h = size.h
@@ -296,9 +303,13 @@ function render(t::Ptr{SDL2.Texture}, pos::AbstractPos{C}, cam::Camera, renderer
         format = Cuint[1]
         SDL2.QueryTexture( t, format, access, w, h );
         w,h = w[], h[]
+
+        if size isa Number
+            w,h = Cint(round(w*size)), Cint(round(h*size))
+        end
     end
     rect = SDL2.Rect(pos.x - w÷2,pos.y - h÷2,w,h)
-    SDL2.RenderCopy(renderer, t, C_NULL, pointer_from_objref(rect))
+    SDL2.RenderCopy(renderer, t, src_rect, pointer_from_objref(rect))
 end
 
 
