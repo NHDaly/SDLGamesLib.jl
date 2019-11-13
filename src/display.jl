@@ -1,13 +1,28 @@
 # Defines structures and functions relating to display.
 
-export ScreenCoords, ScreenPixelCoords, ScreenPixelPos, ScreenPixelDims,
+export render, ScreenCoords, ScreenPixelCoords, ScreenPixelPos, ScreenPixelDims,
         UIPixelCoords, UIPixelPos, UIPixelDims, Camera, dpiScale, worldScale,
         screenCenter, screenCenterX, screenCenterY, screenOffsetFromCenter,
         winWidth, winHeight, winWidth_highDPI, winHeight_highDPI,
         toScreenPos, toScreenPixelDims, toUIPixelPos, toUIPixelDims,
         SetRenderDrawColor, blendAlphaColors, topLeftPos, rectOrigin, render,
         renderRectCentered, renderRectFromOrigin, renderText, renderTextSurface,
-        createText, sizeText, hcat_render_text, loadFont, render
+        createText, sizeText, hcat_render_text, loadFont
+
+"""
+    render(obj, pos::AbstractPos, cam::Camera, renderer;
+           size = nothing, src_rect = C_NULL)
+
+Anything that can be drawn to the screen in the game should support the `render` method,
+which should draw the `obj` onto the `renderer`. This will be called once each frame to
+update the screen.
+
+Note that SDL2 will handle things like drawing outside the current screen, so you don't need
+to worry about checking if the object is visible inside the `cam`, etc. Simply draw the
+`obj` onto the `renderer` using any available functionality.
+"""
+function render end
+
 
 """ Coordinate system to represent the screen, not the Game World.
 Importantly, these are "upside-down" from WorldCoords: (0,0) is top-left, and

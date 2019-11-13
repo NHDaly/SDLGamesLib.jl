@@ -1,7 +1,21 @@
 # Objects in the game and their supporting functions (update!, collide!, ...)
 
-export AbstractPos, AbstractDims, WorldCoords, WorldPos, WorldDims, toWorldPos,
+export update!, AbstractPos, AbstractDims, WorldCoords, WorldPos, WorldDims, toWorldPos,
         toWorldDims, Vector2D, magSqrd, magnitude, unitVec
+
+"""
+    update!(obj, dt)
+
+All objects in the game should support the `update!` method, which tells them each frame
+how much time has passed since the last frame, and allows them to update themselves in
+whatever way they would behave during that elapsed time (e.g. moving position according to
+their current velocity).
+
+`update!` is used to update anything that should change over time, including non-"game"
+objects such as UI components, animations, music controllers, Timers, etc.
+"""
+function update! end
+
 
 # Abstract positions and dimensions in arbitrary coordinate systems for the
 # game. Concrete Pos and Dims must always be used with the same CoordType.
